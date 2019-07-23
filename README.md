@@ -1,122 +1,115 @@
-[SBS3] Spring Boot Sample SAML 2.0 Service Provider
-====================
+# Spring Boot, SAML, and Okta
 
-[![Build Status](https://travis-ci.org/vdenotaris/spring-boot-security-saml-sample.svg?branch=master)](https://travis-ci.org/vdenotaris/spring-boot-security-saml-sample)
-[![DOI](https://zenodo.org/badge/22013861.svg)](https://zenodo.org/badge/latestdoi/22013861)
-![GitHub release](https://img.shields.io/github/release/vdenotaris/spring-boot-security-saml-sample.svg)
-[![GitHub forks](https://img.shields.io/github/forks/vdenotaris/spring-boot-security-saml-sample.svg)](https://github.com/vdenotaris/spring-boot-security-saml-sample/network)
-[![GitHub stars](https://img.shields.io/github/stars/vdenotaris/spring-boot-security-saml-sample.svg)](https://github.com/vdenotaris/spring-boot-security-saml-sample/stargazers)
-[![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/vdenotaris/spring-boot-security-saml-sample/master/LICENSE)
-![Beerpay](https://img.shields.io/beerpay/vdenotaris/spring-boot-security-saml-sample.svg)
+A Spring Boot example app that shows how to implement single sign-on (SSO) with Spring Security's SAML DSL and Okta.
 
----------
+Please read [Get Started with Spring Boot, SAML, and Okta](https://developer.okta.com/blog/2017/03/16/spring-boot-saml) to see how this app was created.
 
-<img src="https://i.ibb.co/CKbFBzH/logo-small.png" align="right" />
+**Prerequisites:** [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
 
-## Project description
+> [Okta](https://developer.okta.com/) has Authentication and User Management APIs that reduce development time with instant-on, scalable user infrastructure. Okta's intuitive API and expert support make it easy for developers to authenticate, manage and secure users and roles in any application.
 
-This project represents a sample implementation of a **SAML 2.0 Service Provider**, completely built on **Spring Framework**. In particular, it shows how to develop a web solution devised for Federated Authentication, by integrating **Spring Boot** and **Spring Security SAML**. The configuration has been completely defined using *Java annotations* (no XML).
+* [Getting Started](#getting-started)
+* [Links](#links)
+* [Help](#help)
+* [License](#license)
 
-**SSOCircle** ([ssocircle.com](http://www.ssocircle.com/en/portfolio/publicidp/)) is used as public Identity Provider for test purpose.
+## Getting Started
 
-- **Author:** Vincenzo De Notaris ([dev@vdenotaris.com](mailto:dev@vdenotaris.com))
-- **Website:** [www.vdenotaris.com](http://www.vdenotaris.com)
-- **Version:**  ` 2.1.0.RELEASE`
-- **Last update**: March 24th, 2019
+To install this example application, run the following commands:
 
-Thanks to *Vladimír Schäfer* ([github.com/vschafer](https://github.com/vschafer)) for supporting my work.
-
-### References
-
-#### Spring Boot
-
-> Spring Boot makes it easy to create Spring-powered, production-grade applications and services with absolute minimum fuss.  It takes an opinionated view of the Spring platform so that new and existing users can quickly get to the bits they need.
-> - **Ref.:** [http://projects.spring.io/spring-boot/](http://projects.spring.io/spring-boot/)
-
-#### Spring Security SAML Extension
-
-> Spring SAML Extension allows seamless inclusion of SAML 2.0 Service Provider capabilities in Spring applications. All products supporting SAML 2.0 in Identity Provider mode (e.g. ADFS 2.0, Shibboleth, OpenAM/OpenSSO, Ping Federate, Okta) can be used to connect with Spring SAML Extension.
-> - **Ref.:** [http://projects.spring.io/spring-security-saml/](http://projects.spring.io/spring-security-saml/)
-
----------
-
-## Walkthrough
-
-### Run as Docker container
-
-To make it even easier, it is possible to run the project "as-is" also as Docker container. A valid account on [SSOCircle](https://www.ssocircle.com/en/) is needed to perform the authentication process.
-
-**Run as container building a Docker image**
-
-```
-docker run -it --rm -p 8080:8080 -t vdenotaris/spring-saml-sp:2.1.0-openjdk8
+```bash
+git clone https://github.com/oktadeveloper/okta-spring-boot-saml-example.git
+cd okta-spring-boot-saml-example
 ```
 
-*Note: the related Docker image is publicly available on [Docker Hub](https://hub.docker.com/r/vdenotaris/spring-saml-sp/).*
+This will get a copy of the project installed locally. To install all of its dependencies and start the app, run:
+ 
+```bash
+./mvnw spring-boot:run
+```
 
+### Create a SAML App in Okta
 
-The Service Provider is deployed as web application. Enter [http://localhost:8080/](http://localhost:8080/) in a browser to see the application running.
+The first thing you'll need to do is create an Okta account at [okta.com/integrate/signup](https://www.okta.com/integrate/signup/). After activating your account, log in to it. If you just created an account, you'll see a screen similar to the one below.
 
-If you’re using Docker natively on Linux, Docker for Mac, or Docker for Windows, then the web app should now be listening on port 8080 on your Docker daemon host. Point your web browser to http://localhost:8080 to find the starting page. If this doesn’t resolve, you can also try [http://127.0.0.1:8080/](http://127.0.0.1:8080/).
+<img src="static/okta-dev-console.png" alt="Okta Dev Console" width="800"/>
+ 
+Click on **< > Developer Console** in the top-left corner and switch to the Classic UI. If you see a screen like the following, you're good to go! The reason you need to use the Classic UI for this tutorial is because we haven't yet added SAML support to the [Developer Console](/blog/2017/09/25/all-new-developer-console).
 
-If you’re using Docker Machine on a Mac or Windows, use `docker-machine ip MACHINE_VM` to get the IP address of your Docker host. Then, open *http://MACHINE_VM_IP:8080* in a browser. However, please note that the Service Provider is statically registered with localhost as endpoint on SSOCircle. Thus you need to reconfigure the application.
+<img src="static/okta-classic-ui.png" alt="Okta Classic UI" width="800"/>
 
-------
+Click **Add Applications** in the top right to continue. This will bring you to a screen with a **Create New App** green button on the left.
 
-### Unit tests
+<img src="static/create-new-app.png" alt="Create New App" width="800"/>
 
-I would like to say thank you to *Alexey Syrtsev* ([github.com/airleks](https://github.com/airleks)) for his contribution on unit tests.
+Click the button and choose **Web** for the platform and **SAML 2.0** for the sign on method.
 
-| Metric | Result |
-| ------------- | -----:|
-| Coverage % | 99% |
-| Lines Covered | 196 |
-| Total Lines | 199 |
+<img src="static/new-app-saml-2.0.png" alt="New App with SAML 2.0" width="700"/>
 
-------
+Click the **Create** button. The next screen will prompt you for an application name. I used "Spring SAML”, but any name will work.
 
-### Additional notes
+<img src="static/app-name.png" alt="Enter App name" width="800"/>
 
-1. The certificate on [https://idp.ssocircle.com/](https://idp.ssocircle.com/) seems to change on a fairly regular basis. This results in the following exception. 
+Click the **Next** button. This brings you to the second step, configuring SAML. Enter the following values:
 
-`javax.net.ssl.SSLPeerUnverifiedException: SSL peer failed hostname validation for name: null`
+* Single sign on URL: `https://localhost:8443/saml/SSO`
+* Audience URI: `https://localhost:8443/saml/metadata`
 
-To update the SSOCircle certificates within the keystore, just run: 
+<img src="static/saml-integration.png" alt="SAML Integration" width="800"/>
 
-	cd src/main/resources/saml/ && sh ./update-certifcate.sh 
+Scroll to the bottom of the form and click **Next**. This will bring you to the third step, feedback. Choose "I'm an Okta customer adding an internal app” and optionally select the App type.
 
-2. Sometimes SSO Circle could display you an error during the authenticaton process. In this case, please update your federation metadata directly on [https://idp.ssocircle.com](https://idp.ssocircle.com):
+<img src="static/customer-or-partner.png" alt="Customer or Partner" width="800"/>
 
-	> Manage Metadata > Service Provider Metadata
-	
-	Remove the current record and add a new one, using your FQDN and providing a new copy of your metadata: your can retrieve them at [http://localhost:8080/saml/metadata](http://localhost:8080/saml/metadata).
+Click the **Finish** button to continue. This will bring you to the application's "Sign On” tab which has a section with a link to your applications metadata in a yellow box. Copy the **Identity Provider metadata** link as you'll need it to configure your Spring Boot application.
 
-3. When the project version corresponds with the Spring Boot parent version, Maven may give you a warning as follows:
+<img src="static/saml-metadata.png" alt="SAML Metadata" width="800"/>
 
-	> Version is duplicate of parent version.
+The final setup step you'll need is to assign people to the application. Click on the **Assignments** tab and the **Assign** > **Assign to People** button. You'll see a list of people with your account in it.
 
-	Actually there is nothing wrong with the used configuration, thus you can just ignore that message.
+<img src="static/assign-people.png" alt="Assign People" width="600"/>
 
----------
+Click the **Assign** button, accept the default username (your email), and click the **Done** button.
 
-### License
+Update `src/main/resources/application.properties`, to have the `metadata-url` for the app you just created. Make sure to use the "Identity Provider metadata" value you copied earlier (hint: you can find it again under the "Sign On” tab in your Okta application).
 
-    Copyright 2019 Vincenzo De Notaris
+```properties
+server.port = 8443
+server.ssl.enabled = true
+server.ssl.key-alias = spring
+server.ssl.key-store = classpath:saml/keystore.jks
+server.ssl.key-store-password = secret
 
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
+security.saml2.metadata-url = <your metadata url>
+```
 
-	    http://www.apache.org/licenses/LICENSE-2.0
+### Run the App and Login with Okta
 
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
+Start the app using your IDE or `mvn spring-boot:run` and navigate to `https://localhost:8443`. If you're using Chrome, you'll likely see a privacy error.
 
-## Support on Beerpay
-Hey dude! Help me out for a couple of :beers:!
+<img src="static/connection-not-private.png" alt="Connection Not Private" width="800"/>
 
-[![Beerpay](https://beerpay.io/vdenotaris/spring-boot-security-saml-sample/badge.svg?style=beer-square)](https://beerpay.io/vdenotaris/spring-boot-security-saml-sample)  [![Beerpay](https://beerpay.io/vdenotaris/spring-boot-security-saml-sample/make-wish.svg?style=flat-square)](https://beerpay.io/vdenotaris/spring-boot-security-saml-sample?focus=wish)
+Click the "ADVANCED" link at the bottom. Then click the "proceed to localhost (unsafe)” link.
+
+<img src="static/connection-not-private-proceed.png" alt="Proceed to localhost" width="800"/>
+
+Next, you'll be redirected to Okta to sign in and redirected back to your app. If you're already logged in, you won't see anything from Okta. If you sign out from Okta, you'll see a login screen such as the one below.
+
+<img src="static/okta-login.png" alt="Okta Login" width="800"/>
+
+After you've logged in, you should see a screen like the one below.
+
+<img src="static/hello-saml.png" alt="Hello SAML" width="800"/>
+
+## Links
+
+This example uses [Spring Security SAML DSL](https://github.com/spring-projects/spring-security-saml-dsl) to integrate with Okta. Kudos to the project's [spring-security-saml-dsl-sample for its instructions](https://github.com/spring-projects/spring-security-saml-dsl/blob/master/samples/spring-security-saml-dsl-sample/README.md).
+
+## Help
+
+Please post any questions as comments on the [blog post](http://developer.okta.com/blog/2017/03/16/spring-boot-saml), or visit our [Okta Developer Forums](https://devforum.okta.com/). You can also email developers@okta.com if would like to create a support ticket.
+
+## License
+
+Apache 2.0, see [LICENSE](LICENSE).
 
