@@ -1,18 +1,11 @@
-package com.example.demo;
+package com.example.saml;
 
-import static org.springframework.security.extensions.saml2.config.SAMLConfigurer.saml;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
-@EnableWebSecurity
-@Configuration
-@EnableGlobalMethodSecurity(securedEnabled = true)
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+//@EnableWebSecurity
+//@Configuration
+//@EnableGlobalMethodSecurity(securedEnabled = true)
+public class SecurityConfiguration {/*extends WebSecurityConfigurerAdapter {
     @Value("${security.saml2.metadata-url}")
     String metadataUrl;
 
@@ -49,5 +42,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .and()
                 .identityProvider()
                 .metadataFilePath(this.metadataUrl);
-    }
+    }*/
 }
