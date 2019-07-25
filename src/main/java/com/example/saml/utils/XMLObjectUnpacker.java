@@ -1,8 +1,8 @@
 package com.example.saml.utils;
 
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.schema.XSString;
-import org.opensaml.xml.schema.impl.XSAnyImpl;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.schema.XSString;
+import org.opensaml.core.xml.schema.impl.XSAnyImpl;
 
 public class XMLObjectUnpacker {
 	public String getAttributeValue(XMLObject attributeValue) {

@@ -34,4 +34,17 @@ public class SAMLAssertionsController {
 		}
 		LOGGER.info("Hi i am called");
 	}
+	
+	@RequestMapping("/logout")
+	public void logout(HttpServletRequest request, HttpServletResponse response) {
+
+		try {
+			samlLoginService.doLogout(response);
+		} catch (SamlException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		LOGGER.info("Hi i am called");
+	}
 }
