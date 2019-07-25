@@ -17,23 +17,21 @@ import com.example.saml.service.SAMLLoginService;
 @RestController
 public class SAMLAssertionsController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SAMLAssertionsController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SAMLAssertionsController.class);
 
-    @Autowired
-    SAMLLoginService samlLoginService;
+	@Autowired
+	SAMLLoginService samlLoginService;
 
+	@RequestMapping("/login")
+	public void login(HttpServletRequest request, HttpServletResponse response) {
 
-    @RequestMapping("/login")
-    public void login(HttpServletRequest request,
-                      HttpServletResponse response) {
-
-        try {
-            samlLoginService.doLogin(response);
-        } catch (SamlException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        LOGGER.info("Hi i am called");
-    }
+		try {
+			samlLoginService.doLogin(response);
+		} catch (SamlException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		LOGGER.info("Hi i am called");
+	}
 }

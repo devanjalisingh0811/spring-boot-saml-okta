@@ -1,7 +1,5 @@
 package com.example.saml;
 
-import org.springframework.context.annotation.Configuration;
-
 //@EnableWebSecurity
 //@Configuration
 //@EnableGlobalMethodSecurity(securedEnabled = true)

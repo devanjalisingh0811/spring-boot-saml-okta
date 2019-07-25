@@ -1,12 +1,20 @@
 package com.example.saml.service;
 
-import com.coveo.saml.SamlClient;
-import com.coveo.saml.SamlException;
-import com.coveo.saml.SamlResponse;
-import com.example.saml.utils.XMLObjectUnpacker;
-import com.example.saml.utils.XmlFormatter;
-import com.sun.org.apache.xerces.internal.parsers.DOMParser;
-import org.opensaml.saml2.core.Assertion;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.opensaml.saml2.core.Response;
 import org.opensaml.xml.Configuration;
 import org.opensaml.xml.io.UnmarshallingException;
@@ -17,125 +25,122 @@ import org.springframework.stereotype.Service;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.coveo.saml.SamlClient;
+import com.coveo.saml.SamlClient.SamlIdpBinding;
+import com.coveo.saml.SamlException;
+import com.example.saml.utils.XMLObjectUnpacker;
+import com.example.saml.utils.XmlFormatter;
+import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 
 @Service
 public class SAMLLoginService {
 
+	private final static Logger LOGGER = LoggerFactory.getLogger(SAMLLoginService.class);
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(SAMLLoginService.class);
+	SamlClient samlClient = null;
+	
+	public void doLogin(HttpServletResponse response) throws SamlException, IOException {
 
-    public void doLogin(HttpServletResponse response) throws SamlException, IOException {
+		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		InputStream is = classloader.getResourceAsStream("metadata.xml");
 
-        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-        InputStream is = classloader.getResourceAsStream("metadata.xml");
+		InputStreamReader inputStreamReader = new InputStreamReader(is);
 
+		samlClient = SamlClient.fromMetadata("deva_saml_poc", "http://localhost:8081/saml/sso",
+				inputStreamReader, SamlIdpBinding.POST);
+		/*SamlClient samlClient = SamlClient.fromMetadata("deva_saml_poc", "http://localhost:8081/saml/sso",
+				inputStreamReader, SamlIdpBinding.Redirect);*/
 
-        InputStreamReader inputStreamReader = new InputStreamReader(is);
+		String encodedRequest = samlClient.getSamlRequest();
+		String idpUrl = samlClient.getIdentityProviderUrl();
+		LOGGER.info("IDP URL  :  " + idpUrl);
+		LOGGER.info("Encoded Request  :  " + encodedRequest);
+		// To initiate the authentication exchange
+		samlClient.redirectToIdentityProvider(response, null);
 
-        SamlClient samlClient = SamlClient.fromMetadata("devanjali",
-                "http://localhost:8081/saml/sso",
-                inputStreamReader);
+	}
 
+	// Pure Java
+	private static String convertInputStreamToString(InputStream inputStream) throws IOException {
 
-        String encodedRequest = samlClient.getSamlRequest();
-        String idpUrl = samlClient.getIdentityProviderUrl();
-        LOGGER.info("IDP URL  :  " + idpUrl);
-        LOGGER.info("Encoded Request  :  " + encodedRequest);
-        // To initiate the authentication exchange
-        samlClient.redirectToIdentityProvider(response, null);
+		ByteArrayOutputStream result = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int length;
+		while ((length = inputStream.read(buffer)) != -1) {
+			result.write(buffer, 0, length);
+		}
 
-    }
+		return result.toString(StandardCharsets.UTF_8.name());
 
+	}
 
-    // Pure Java
-    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+	public Map<String, Object> parseSAMLResponse(HttpServletRequest request) throws SamlException, IOException {
 
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = inputStream.read(buffer)) != -1) {
-            result.write(buffer, 0, length);
-        }
+		Map<String, Object> stringStringMap = new HashMap<>();
 
-        return result.toString(StandardCharsets.UTF_8.name());
+		String encodedResponse = request.getParameter("SAMLResponse");
+		LOGGER.info("User Authenticated :  " + encodedResponse);
+		Response response = decodeAndValidateSamlResponse(encodedResponse);
 
-    }
+		stringStringMap.put("issuer", response.getIssuer().getValue());
+		stringStringMap.put("status", response.getStatus().getStatusCode().getValue());
+		XMLObjectUnpacker xmlObjectUnpacker = new XMLObjectUnpacker();
+		response.getIssuer().getValue();
+		response.getAssertions().forEach(assertion -> {
+			stringStringMap.put("nameId", assertion.getSubject().getNameID().getValue());
 
-    public Map<String, Object> parseSAMLResponse(HttpServletRequest request) throws SamlException, IOException {
+			assertion.getAttributeStatements()
+					.forEach(attributeStatement -> attributeStatement.getAttributes().forEach(attribute -> {
+						String key = attribute.getName();
+						List<String> strings = new ArrayList<>();
+						attribute.getAttributeValues().forEach(xmlObject -> {
+							strings.add((xmlObjectUnpacker.getAttributeValue(xmlObject)));
+						});
 
-        Map<String, Object> stringStringMap = new HashMap<>();
+						stringStringMap.put(key, strings);
+					}));
+		});
 
-        String encodedResponse = request.getParameter("SAMLResponse");
-        LOGGER.info("User Authenticated :  " + encodedResponse);
-        Response response = decodeAndValidateSamlResponse(encodedResponse);
+		XmlFormatter xmlFormatter = new XmlFormatter();
+		String data = xmlFormatter.format(new String(Base64.decode(encodedResponse), "UTF-8"));
+		stringStringMap.put("xml", data);
+		return stringStringMap;
+	}
 
-        stringStringMap.put("issuer", response.getIssuer().getValue());
-        stringStringMap.put("status", response.getStatus().getStatusCode().getValue());
-        XMLObjectUnpacker xmlObjectUnpacker = new XMLObjectUnpacker();
-        response.getIssuer().getValue();
-        response.getAssertions().forEach(assertion -> {
-            stringStringMap.put("nameId", assertion.getSubject().getNameID().getValue());
+	public Response decodeAndValidateSamlResponse(String encodedResponse) throws SamlException {
+		String decodedResponse;
+		try {
+			decodedResponse = new String(Base64.decode(encodedResponse), "UTF-8");
+		} catch (UnsupportedEncodingException var6) {
+			throw new SamlException("Cannot decode base64 encoded response", var6);
+		}
 
-            assertion.getAttributeStatements().forEach(attributeStatement -> attributeStatement.getAttributes().forEach(attribute -> {
-                String key = attribute.getName();
-                List<String> strings = new ArrayList<>();
-                attribute.getAttributeValues().forEach(xmlObject -> {
-                    strings.add((xmlObjectUnpacker.getAttributeValue(xmlObject)));
-                });
+		Response response;
+		try {
+			DOMParser parser = createDOMParser();
+			parser.parse(new InputSource(new StringReader(decodedResponse)));
+			response = (Response) Configuration.getUnmarshallerFactory()
+					.getUnmarshaller(parser.getDocument().getDocumentElement())
+					.unmarshall(parser.getDocument().getDocumentElement());
+		} catch (SAXException | UnmarshallingException | IOException var5) {
+			throw new SamlException("Cannot decode xml encoded response", var5);
+		}
 
-                stringStringMap.put(key, strings);
-            }));
-        });
+		return response;
+	}
 
-        XmlFormatter xmlFormatter = new XmlFormatter();
-        String data = xmlFormatter.format(new String(Base64.decode(encodedResponse), "UTF-8"));
-        stringStringMap.put("xml", data);
-        return stringStringMap;
-    }
-
-
-    public Response decodeAndValidateSamlResponse(String encodedResponse) throws SamlException {
-        String decodedResponse;
-        try {
-            decodedResponse = new String(Base64.decode(encodedResponse), "UTF-8");
-        } catch (UnsupportedEncodingException var6) {
-            throw new SamlException("Cannot decode base64 encoded response", var6);
-        }
-
-
-        Response response;
-        try {
-            DOMParser parser = createDOMParser();
-            parser.parse(new InputSource(new StringReader(decodedResponse)));
-            response = (Response) Configuration.getUnmarshallerFactory().getUnmarshaller(parser.getDocument().getDocumentElement()).unmarshall(parser.getDocument().getDocumentElement());
-        } catch (SAXException | UnmarshallingException | IOException var5) {
-            throw new SamlException("Cannot decode xml encoded response", var5);
-        }
-
-
-        return response;
-    }
-
-    private static DOMParser createDOMParser() throws SamlException {
-        DOMParser parser = new DOMParser() {
-            {
-                try {
-                    this.setFeature("http://apache.org/xml/features/include-comments", false);
-                } catch (Throwable var2) {
-                    throw new SamlException("Cannot disable comments parsing to mitigate https://www.kb.cert.org/vuls/id/475445", var2);
-                }
-            }
-        };
-        return parser;
-    }
+	private static DOMParser createDOMParser() throws SamlException {
+		DOMParser parser = new DOMParser() {
+			{
+				try {
+					this.setFeature("http://apache.org/xml/features/include-comments", false);
+				} catch (Throwable var2) {
+					throw new SamlException(
+							"Cannot disable comments parsing to mitigate https://www.kb.cert.org/vuls/id/475445", var2);
+				}
+			}
+		};
+		return parser;
+	}
 
 }

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <md:EntityDescriptor
 	xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
 	entityID="http://www.okta.com/exkzeza56UzWFz351356">
@@ -30,6 +29,12 @@
 				</ds:X509Data>
 			</ds:KeyInfo>
 		</md:KeyDescriptor>
+		<md:SingleLogoutService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+			Location="https://dev-419702.okta.com/app/idemiadev419702_demosaml_1/exkzeza56UzWFz351356/slo/saml" />
+		<md:SingleLogoutService
+			Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+			Location="https://dev-419702.okta.com/app/idemiadev419702_demosaml_1/exkzeza56UzWFz351356/slo/saml" />
 		<md:NameIDFormat>
 			urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
 		</md:NameIDFormat>
