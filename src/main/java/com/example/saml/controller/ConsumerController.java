@@ -34,34 +34,12 @@ public class ConsumerController {
 
 		return modelAndView;
 	}
-	
-	@RequestMapping("/saml/sso1")
-	public ModelAndView catchAssertions1(HttpServletRequest request, HttpServletResponse response)
-			throws IOException, SamlException {
-		LOGGER.info("+++++++++++++++++++++++++++++++++++++");
-		LOGGER.info("+++++++++++++++++++++++++++++++++++++");
-		LOGGER.info("+++++++++++++++++++++++++++++++++++++");
-		LOGGER.info("+++++++++++++++++++++++++++++++++++++");
-		LOGGER.info("+++++++++++++++++++++++++++++++++++++");
-		LOGGER.info("+++++++++++++++++++++++++++++++++++++");
-		LOGGER.info("+++++++++++++++++++++++++++++++++++++");
-		LOGGER.info("+++++++++++++++++++++++++++++++++++++");
-
-		ModelAndView modelAndView = new ModelAndView("test");
-
-		return modelAndView;
-	}
-	
-	
-	
-	
 
 	@RequestMapping("/saml/sso/logout")
 	public ModelAndView singleLogout(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, SamlException {
 		LOGGER.info("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&log out");
 		ModelAndView modelAndView = new ModelAndView("test");
-
 		return modelAndView;
 	}
 }
