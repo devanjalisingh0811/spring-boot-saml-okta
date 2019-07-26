@@ -27,7 +27,7 @@ public class ConsumerController {
 	@RequestMapping("/saml/sso")
 	public ModelAndView catchAssertions(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, SamlException {
-		LOGGER.info("+++++++++++++++++++++++++++++++++++++");
+		LOGGER.info("******Get saml response******");
 		Map<String, Object> stringStringMap = samlLoginService.parseSAMLResponse(request);
 		ModelAndView modelAndView = new ModelAndView("test");
 		modelAndView.addAllObjects(stringStringMap);
@@ -38,7 +38,7 @@ public class ConsumerController {
 	@RequestMapping("/saml/sso/logout")
 	public ModelAndView singleLogout(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, SamlException {
-		LOGGER.info("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&log out");
+		LOGGER.info("******log out******");
 		ModelAndView modelAndView = new ModelAndView("test");
 		return modelAndView;
 	}

@@ -24,7 +24,7 @@ public class SAMLAssertionsController {
 
 	@RequestMapping("/login")
 	public void login(HttpServletRequest request, HttpServletResponse response) {
-
+		LOGGER.info("******login******");
 		try {
 			samlLoginService.doLogin(response);
 		} catch (SamlException e) {
@@ -32,11 +32,11 @@ public class SAMLAssertionsController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		LOGGER.info("Hi i am called");
 	}
 	
 	@RequestMapping("/logout")
 	public void logout(HttpServletRequest request, HttpServletResponse response) {
+		LOGGER.info("******Logout******");
 
 		try {
 			samlLoginService.doLogout(response);
@@ -45,6 +45,5 @@ public class SAMLAssertionsController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		LOGGER.info("Hi i am called");
 	}
 }

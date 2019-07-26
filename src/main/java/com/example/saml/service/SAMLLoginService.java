@@ -57,20 +57,6 @@ public class SAMLLoginService {
 
 	public void doLogout(HttpServletResponse response) throws SamlException, IOException {
 
-		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-		InputStream is = classloader.getResourceAsStream("metadata.xml");
-
-		InputStreamReader inputStreamReader = new InputStreamReader(is);
-
-		samlClient = SamlClient.fromMetadata("deva_saml_poc", "https://localhost:8081/saml/sso", inputStreamReader);
-
-		String encodedRequest = samlClient.getSamlRequest();
-		String idpUrl = samlClient.getIdentityProviderUrl();
-		LOGGER.info("IDP URL  :  " + idpUrl);
-		LOGGER.info("Encoded Request  :  " + encodedRequest);
-		// To initiate the authentication exchange
-		samlClient.redirectToIdentityProvider(response, null);
-
 	}
 
 	public Map<String, Object> parseSAMLResponse(HttpServletRequest request) throws SamlException, IOException {
